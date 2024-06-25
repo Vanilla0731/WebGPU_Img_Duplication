@@ -51,11 +51,25 @@ const fragmentShaderCode = `
 @fragment
 fn fragmentMain(@location(0) fragCoord : vec2<f32>) -> @location(0) vec4<f32> {
     let center = vec2<f32>(0.5, 0.5);
-    let radius = 0.8 * 0.5;
+    let radius = 0.9 * 0.5;
     let dist = distance(fragCoord, center);
 
     if (dist > radius) {
         discard;
+    }
+
+    var startHeight = 0.550;
+    var offsetDiscard = 0.010;
+    var offsetHeight = 0.070;
+
+    for (var i = 0; i < 5; i++) {
+        if (fragCoord.y > startHeight && fragCoord.y < startHeight + offsetDiscard) {
+        discard;
+        break;
+        }
+        offsetDiscard *= 1.6;
+        startHeight -= offsetHeight;
+        offsetHeight += 0.020;
     }
 
     let verticalPos = (fragCoord.y - (0.5 - radius)) / (2.0 * radius);
@@ -66,21 +80,21 @@ fn fragmentMain(@location(0) fragCoord : vec2<f32>) -> @location(0) vec4<f32> {
 }
 `;
 
-const shaderModuleVertex = device.createShaderModule({
+const vertexShaderModule = device.createShaderModule({
     code: vertexShaderCode,
 });
 
-const shaderModuleFragment = device.createShaderModule({
+const fragmentShaderModule = device.createShaderModule({
     code: fragmentShaderCode,
 });
 
 const pipeline = device.createRenderPipeline({
     vertex: {
-        module: shaderModuleVertex,
+        module: vertexShaderModule,
         entryPoint: "vertexMain",
     },
     fragment: {
-        module: shaderModuleFragment,
+        module: fragmentShaderModule,
         entryPoint: "fragmentMain",
         targets: [{
             format: canvasFormat,
